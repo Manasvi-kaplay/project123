@@ -1,0 +1,120 @@
+<html>
+    <head>
+        <title>Image and video search</title>
+        <style>
+              input{
+                  height: 30px;
+                  width: 500px;
+              }
+              select{
+                  height: 30px;
+                  width: 100px;
+              }
+        </style>
+    </head>
+    <body onload="all()">
+        <center>
+            <br>
+            <span>
+                <input id="term" type="text" name="name" placeholder="Search images and videos">
+                  <select id="type" name="type">
+                    <option>Images</option>
+                    <option>Videos</option>
+                  </select>
+                  <button type="button" onclick="specific()">Submit</button>
+                </span>
+            </center>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            <script type="text/javascript">
+             var API_KEY = '18525176-9375201fa157d3b13491d8253';
+             //563492ad6f917000010000019f0cccef39434e3d85e53bfa58896c18    pexels api key
+                function all(){
+                    var src=[];
+                    var URL = "https://pixabay.com/api/?key="+API_KEY;
+                    $.getJSON(URL, function(){
+                        })
+                        .done(function(data){
+                            if (parseInt(data.totalHits) > 0){
+                                var array=data.hits;
+                                function shuffle(array) {
+                                    var currentIndex = array.length;
+                                    var temporaryValue;
+                                    var randomIndex;
+                                      while (0 !== currentIndex) {
+                                        randomIndex = Math.floor(Math.random() * currentIndex);
+                                        currentIndex -= 1;
+                                        temporaryValue = array[currentIndex];
+                                        array[currentIndex] = array[randomIndex];
+                                        array[randomIndex] = temporaryValue;
+                                      }
+                                      return array;
+                                    }
+                                    var shuffled = shuffle(array);
+                                $.each(shuffled, function(i, hit){ 
+                                    var x = document.createElement("IMG");
+                                    //var y = document.createElement("IMG");
+                                    x.setAttribute("src", hit.previewURL);
+                                    x.setAttribute("width", "228");
+                                    x.setAttribute("height", "228");
+                                    x.setAttribute("alt", "image not available");
+                                    x.style.margin="10px 10px 10px 10px"
+                                    /*y.setAttribute("src", hit.userImageURL);
+                                    y.setAttribute("width", "228");
+                                    y.setAttribute("height", "228");
+                                    y.setAttribute("alt", "image not available");
+                                    y.style.margin="10px 10px 10px 10px"*/
+                                    document.body.appendChild(x);
+                                    //document.body.appendChild(y);
+                                    });
+                                }
+                                else{
+                                console.log('No hits');
+                                }
+                        })
+                        .fail(function(){
+                            console.log("failed request....");
+                            var api_key = "563492ad6f917000010000019f0cccef39434e3d85e53bfa58896c18";
+                            $.ajax({
+                                method: 'GET',
+                                        beforeSend: function(xhr){
+                                        xhr.setRequestHeader("Authorization", api_key);
+                                    },
+                                url:"https://api.pexels.com/v1/curated?per_page=40",
+                                success: function(data){
+                        
+                                    data.photos.forEach(element=>{
+                                        var width = element.width;
+                                        var height = element.height;
+                                      //  if (width>=height){
+                                             var str1 = element.src.original;
+                                             var str2 = "?auto=compress&cs=tinysrgb&w=1400";
+                                             var res = str1.concat(str2);
+                                             console.log(res);
+                                             var x = document.createElement("IMG");
+                                     x.setAttribute("src", res);
+                                     x.setAttribute("width", "228");
+                                     x.setAttribute("height", "228");
+                                     x.setAttribute("alt", "image not available");
+                                     x.style.margin="10px 10px 10px 10px"
+                                     document.body.appendChild(x) 
+                                      //  };
+                                    });
+                                }
+                        })
+                    })
+                    }
+                   // document.getElementById("hellobutton").addEventListener("click", all);
+                    function specific(){
+                        var x = document.getElementById("term").value;
+                        console.log("you typed.....",x);
+                        var y=document.getElementById("type").value;
+                        console.log("y....",y)
+                        localStorage.setItem("name",x);
+                        localStorage.setItem("type",y);
+                       
+                        //console.log("tags array....****",tags.toString());
+                        location.href = "http://localhost:5000/img_video_search/result";
+                        }
+            </script>
+    </body>
+</html>

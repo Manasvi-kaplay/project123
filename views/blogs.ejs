@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <title>Fetching blogs</title>
+    <style>
+      .float-container {
+        padding: 0px;
+      }
+      .box{
+        background-color: white;
+        height:170px;
+        width:320px;
+        border:1px solid black;
+        float:left;
+        margin-left: 150px;
+       position: relative;
+      }
+      input{
+        height:30px;
+        width:1100px;
+      }
+      h3{
+        font-family:cursive;
+        font-size:x-large;
+      }
+      h4{
+        font-family:cursive;
+        font-size:larger;
+      }
+    </style>
+  </head>
+  <body bgcolor="#ebebe0">
+    <center>
+    <div id="content"></div>
+    <br>
+    <h3>Lets create a video!</h3>
+    <div class="float-container">
+      <h4>Using blogs</h4>
+      <input id="blog" type="text" placeholder="Enter the blog link" name="blog">
+      <button onclick="result()">Go</button>
+    </div>
+    </center>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      function result(){
+        var val=document.getElementById("blog").value;
+        console.log("you entered...",val);
+        $.get('/blogs',{link:val},function(result){
+        })
+        $.get('/data',function(data){
+          var obj=JSON.parse(data);
+          console.log("obj...",obj)
+          var h = document.createElement("H3");
+          var t = document.createTextNode("Blog summary");
+          h.appendChild(t);
+          document.body.appendChild(h);
+          var h4= document.createElement("H4");
+          var summary = document.createTextNode(obj.summary);
+          h4.appendChild(summary);
+          document.body.appendChild(h4);
+          var bimg = document.createElement("H3");
+          var bimgh = document.createTextNode("Blog images");
+          bimg.appendChild(bimgh);
+          document.body.appendChild(bimg);
+          obj.srcs.forEach(element => {
+            var x = document.createElement("IMG");
+                                    x.setAttribute("src", element);
+                                    x.setAttribute("width", "228");
+                                    x.setAttribute("height", "228");
+                                    x.setAttribute("alt", "image not available");
+                                    x.style.margin="10px 10px 10px 10px"
+                                    document.body.appendChild(x);
+          });
+          var freq=obj.freq.join(" ")
+          console.log("frequent words...",obj.freq[0]);
+          var rimg = document.createElement("H3");
+          var rimgh = document.createTextNode("Recommended images and videos");
+          rimg.appendChild(rimgh);
+          document.body.appendChild(rimg);
+          var API_KEY = '18525176-9375201fa157d3b13491d8253';
+          var URL2 = "https://pixabay.com/api/videos/?key="+API_KEY+"&q="+encodeURIComponent(obj.freq[0]);
+                        $.getJSON(URL2, function(){
+                    })
+                    .done(function(data){
+                        console.log("done videos...");
+                        if (parseInt(data.totalHits) > 0){
+                            var array=data.hits;
+                                console.log("array....",data.hits);
+                            $.each(data.hits, function(i, hit){ 
+                                console.log("search success videos...",hit.videos.medium.url); 
+                            var x = document.createElement("VIDEO");
+                            x.setAttribute("class","vid");
+                            x.setAttribute("src",hit.videos.medium.url);
+                            x.setAttribute("width", "320");
+                            x.setAttribute("height", "240");
+                            x.setAttribute("controls", "controls");
+                            x.setAttribute("onmouseover","this.play()");
+                            x.setAttribute("onmouseout","this.pause();this.currentTime=0;")
+                            x.style.margin="10px 10px 10px 10px"
+                            document.body.appendChild(x);
+                            });
+                        }
+                            else{
+                         console.log('No hits');
+                        }
+                    })
+          var URL = "https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(obj.freq[0]);
+                        $.getJSON(URL, function(){
+                    })
+                    .done(function(data){
+                        console.log("done...")
+                        if (parseInt(data.totalHits) > 0){
+                            var array=data.hits;
+                                console.log("array....",data.hits);
+                            $.each(data.hits, function(i, hit){ 
+                                console.log("search success images...",hit); 
+                                var y = document.createElement("IMG");
+                            y.setAttribute("src", hit.previewURL);
+                            y.setAttribute("width", "228");
+                            y.setAttribute("height", "228");
+                            y.setAttribute("alt", "image not available");
+                            y.style.margin="10px 10px 10px 10px"
+                            document.body.appendChild(y);
+                            });
+                        }
+                            else{
+                         console.log('No hits');
+                        }
+                    })
+        })
+      }
+    </script>
+  </body>
+</html>

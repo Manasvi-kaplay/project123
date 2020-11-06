@@ -1,0 +1,205 @@
+<html>
+    <head>
+        <title>Search results</title>
+        <style>
+              input{
+                  height: 30px;
+                  width: 500px;
+              }
+              select{
+                  height: 30px;
+                  width: 100px;
+              }
+        </style>
+    </head>
+    <body>
+        <br><br>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            <script type="text/javascript">
+            var nm=localStorage.getItem("name");
+            var tp=localStorage.getItem("type");
+            console.log("name...",nm);
+            console.log("type...",tp);
+            var t = document.createTextNode(nm+" "+tp);
+            var br=document.createElement("BR");
+            document.body.appendChild(t);
+            document.body.appendChild(br);
+            var API_KEY = '18525176-9375201fa157d3b13491d8253';
+            var URL2 = "https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(nm);
+                        var tags=[];
+                        var splitted;
+                        $.getJSON(URL2, function(data){
+                            if (parseInt(data.totalHits) > 0){
+                            var array=data.hits;
+                            $.each(data.hits, function(i, hit){ 
+                                if(i<=1){
+                                    tags.push(hit.tags);
+                                }
+                                else if(i==2){
+                                    return false;
+                                }
+                            });
+                            
+                            $.get("/img_video_search/results",{term:nm,tags:tags.toString()});   
+                            for(var i=0; i<tags.length; i+=1){
+                                splitted=tags[i].split(",");
+                                for(var j=0;j<splitted.length;j+=1){
+                                    var button=document.createElement("BUTTON");
+                                    button.id=j;
+                                    button.innerHTML = splitted[j];
+                                    document.body.appendChild(button);
+                                }                  
+                             }     
+                             /*var but0=document.getElementById("0");
+                             but0.onclick=location.href="/searchByTags?tag="+but0.innerHTML;
+                             var but1=document.getElementById("1");
+                             but1.onclick=location.href="http://localhost:5000/img_video_search/searchBy?tag="+but1.innerHTML;
+                             var but2=document.getElementById("2");
+                             but2.onclick=location.href="http://localhost:5000/img_video_search/searchBy?tag="+but2.innerHTML;
+                             var but3=document.getElementById("3");
+                             but3.onclick=location.href="http://localhost:5000/img_video_search/searchBy?tag="+but3.innerHTML;
+                             var but4=document.getElementById("4");
+                             but4.onclick=location.href="http://localhost:5000/img_video_search/searchBy?tag="+but4.innerHTML;
+                             var but5=document.getElementById("5");
+                             but5.onclick=location.href="http://localhost:5000/img_video_search/searchBy?tag="+but5.innerHTML;*/
+                    }
+                })     
+                var br=document.createElement("br");
+                document.body.appendChild(br);
+            if(tp=='Images'){
+                var URL = "https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(nm);
+                        $.getJSON(URL, function(){
+                    })
+                    .done(function(data){
+                        console.log("done...")
+                        if (parseInt(data.totalHits) > 0){
+                            var array=data.hits;
+                                console.log("array....",data.hits);
+                                function shuffle(array) {
+                                    var currentIndex = array.length;
+                                    var temporaryValue;
+                                    var randomIndex;
+                                      while (0 !== currentIndex) {
+                                        randomIndex = Math.floor(Math.random() * currentIndex);
+                                        currentIndex -= 1;
+                                        temporaryValue = array[currentIndex];
+                                        array[currentIndex] = array[randomIndex];
+                                        array[randomIndex] = temporaryValue;
+                                      }
+                                      return array;
+                                    }
+                                    var shuffled = shuffle(array);
+                            $.each(shuffled, function(i, hit){ 
+                                console.log(i,"search success",hit); 
+                                var x = document.createElement("IMG");
+                            x.setAttribute("src", hit.previewURL);
+                            x.setAttribute("width", "228");
+                            x.setAttribute("height", "228");
+                            x.setAttribute("alt", "image not available");
+                            x.style.margin="10px 10px 10px 10px"
+                            document.body.appendChild(x);
+                            });
+                            
+                        }
+                        
+                            else{
+                         console.log('No hits');
+                        }
+                    })
+                    .fail(function(){
+                        console.log("failed request....");
+                            var api_key = "563492ad6f917000010000019f0cccef39434e3d85e53bfa58896c18";
+                            $.ajax({
+                                method: 'GET',
+                                        beforeSend: function(xhr){
+                                        xhr.setRequestHeader("Authorization", api_key);
+                                    },
+                                url:"https://api.pexels.com/v1/search?query="+nm+"&per_page=80&page=1",
+                                success: function(data){
+                        
+                                    data.photos.forEach(element=>{
+                                        var width = element.width;
+                                        var height = element.height;
+                                             var str1 = element.src.original;
+                                             var str2 = "?auto=compress&cs=tinysrgb&w=1400";
+                                             var res = str1.concat(str2);
+                                             console.log(res);
+                                             var x = document.createElement("IMG");
+                                     x.setAttribute("src", res);
+                                     x.setAttribute("width", "228");
+                                     x.setAttribute("height", "228");
+                                     x.setAttribute("alt", "image not available");
+                                     x.style.margin="10px 10px 10px 10px"
+                                     document.body.appendChild(x) 
+                                    });
+                                }
+                        })
+                    })
+            }
+            else if(tp=='Videos'){
+                var URL = "https://pixabay.com/api/videos/?key="+API_KEY+"&q="+encodeURIComponent(nm);
+                        $.getJSON(URL, function(){
+                    })
+                    .done(function(data){
+                        console.log("done videos...");
+                        if (parseInt(data.totalHits) > 0){
+                            var array=data.hits;
+                                console.log("array....",data.hits);
+                                function shuffle(array) {
+                                    var currentIndex = array.length;
+                                    var temporaryValue;
+                                    var randomIndex;
+                                      while (0 !== currentIndex) {
+                                        randomIndex = Math.floor(Math.random() * currentIndex);
+                                        currentIndex -= 1;
+                                        temporaryValue = array[currentIndex];
+                                        array[currentIndex] = array[randomIndex];
+                                        array[randomIndex] = temporaryValue;
+                                      }
+                                      return array;
+                                    }
+                                    var shuffled = shuffle(array);
+                            $.each(shuffled, function(i, hit){ 
+                                console.log("search success...",hit.videos.medium.url); 
+                            var x = document.createElement("VIDEO");
+                            x.setAttribute("src",hit.videos.medium.url);
+                            x.setAttribute("width", "320");
+                            x.setAttribute("height", "240");
+                            x.setAttribute("controls", "controls");
+                            x.style.margin="10px 10px 10px 10px"
+                            document.body.appendChild(x);
+                            });
+                        }
+                            else{
+                         console.log('No hits');
+                        }
+                    })
+                    .fail(function(){
+                        console.log("failed request....");
+                            var api_key = "563492ad6f917000010000019f0cccef39434e3d85e53bfa58896c18";
+                            $.ajax({
+                                method: 'GET',
+                                        beforeSend: function(xhr){
+                                        xhr.setRequestHeader("Authorization", api_key);
+                                    },
+                                url:" https://api.pexels.com/videos/search?query="+nm+"&per_page=40",
+                                success: function(data){
+                        
+                                    data.videos.forEach(element=>{
+                                        var width = element.width;
+                                        var height = element.height;
+                                             var x = document.createElement("VIDEO");
+                                                     x.setAttribute("src",element.video_files[1].link);
+                                                     x.setAttribute("width", "320");
+                                                     x.setAttribute("height", "240");
+                                                     x.setAttribute("controls", "controls");
+                                                     x.style.margin="10px 10px 10px 10px"
+                                                     document.body.appendChild(x); 
+                                    });
+                                }
+                        })
+                    })
+            }
+            </script>
+        </body>
+</html>

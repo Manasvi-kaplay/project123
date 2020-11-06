@@ -1,0 +1,258 @@
+<html>
+    <head>
+    
+        <title>Upload images and videos</title>
+        <style>
+            body
+{
+  background-color:#f5f5f5;
+}
+.imagePreview {
+    width: 100%;
+    height:180px;
+    background-position: center center;
+  background-color:#fff;
+    background-size: cover;
+  background-repeat:no-repeat;
+    display: inline-block;
+  box-shadow:0px -3px 6px 2px rgba(0,0,0,0.2);
+}
+.btn-primary
+{
+  display:block;
+  border-radius:0px;
+  box-shadow:0px 4px 6px 2px rgba(0,0,0,0.2);
+  margin-top:-5px;
+}
+.imgUp
+{
+  margin-bottom:15px;
+}
+.del
+{
+  position:absolute;
+  top:0px;
+  right:15px;
+  width:30px;
+  height:30px;
+  text-align:center;
+  line-height:30px;
+  background-color:rgba(255,255,255,0.6);
+  cursor:pointer;
+}
+.imgAdd
+{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background-color:#4bd7ef;
+  color:#fff;
+  box-shadow:0px 0px 2px 1px rgba(0,0,0,0.2);
+  text-align:center;
+  line-height:30px;
+  margin-top:0px;
+  cursor:pointer;
+  font-size:15px;
+}
+        </style>
+    </head>
+    <body onload="viewAll()">
+        <br>
+        <div class="container">
+          <h2>My uploads</h2>
+          <h3 id="size"></h3>
+          <a  href="#" onclick="javascript:deleteAll()">Delete all</a>
+        </div>
+        <br>
+        <div id="img">
+          <div id="del" style="text-align:center"></div>
+        </div>
+        <div id="aud">
+          <div id="delaud" style="text-align:center"></div>
+        </div>
+        <div id="vid">
+          <div id="delvid" style="text-align:center"></div>
+        </div>
+        <div class="container">
+            <div class="row">
+            <div class="col-sm-2 imgUp">
+              <div class="imagePreview" id="preview"></div>
+          <label class="btn btn-primary">
+         Upload<input type="file" name="content" class="uploadFile img" value="Upload Photo" style="width: 0px;height: 0px;overflow: hidden;">
+                          </label>
+            </div><!-- col-2 -->
+            <i class="imgAdd">+</i>
+           </div><!-- row -->
+          </div><!-- container -->
+          <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+          <script>
+            function deleteAll(){
+              var email="manasvi111.kaplay@gmail.com";
+              $.get('/user_uploads/deleteAll',{email:email},function(data){
+                alert(data);
+              })
+            }
+           // var auto_refresh=setInterval(function(){
+              function viewAll(){
+                $.get('/user_uploads/viewAll',function(data){
+                  var net=35;
+                  data.total_size=data.total_size/1000000;
+                  document.getElementById("size").innerHTML=data.total_size+" MB consumed out of "+net+" MB";
+                  data.urls.forEach(function(x){
+                      if(x.search(".jpg")!=-1 || x.search(".jpeg")!=-1 || x.search(".png")!=-1){
+                        var img = document.createElement("IMG");
+                              img.setAttribute("src", x);
+                              img.setAttribute("width", "228");
+                              img.setAttribute("height", "228");
+                              img.setAttribute("alt", "image not available");
+                              img.style.margin="10px 10px 10px 10px";
+                             var a=document.createElement('A');
+                             a.setAttribute("href","#");
+                             a.onclick=function del(){
+                          $.get('/user_uploads/delete',{url:x},function(data){
+                            console.log("msg..",data);
+                            alert(data);
+                              });
+                             }
+                             a.innerHTML="Delete";
+                             a.appendChild(img);
+                             document.getElementById("img").appendChild(img);
+                             document.getElementById("del").appendChild(a);
+                      }
+                      else if(x.search(".mp3")!=-1){
+                        var aud=document.createElement("AUDIO");
+                        aud.setAttribute("src",x);
+                        aud.setAttribute("width","228");
+                        aud.setAttribute("height","50");
+                        aud.setAttribute("controls", "controls");
+                        aud.style.margin="10px 10px 10px 10px";
+                        var a_aud=document.createElement('A');
+                             a_aud.setAttribute("href","#");
+                             a_aud.onclick=function del(){
+                          $.get('/user_uploads/delete',{url:x},function(data){
+                            console.log("msg..",data);
+                            alert(data);
+                              });
+                             }
+                             a_aud.innerHTML="Delete";
+                             a_aud.appendChild(aud);
+                             document.getElementById("aud").appendChild(aud);
+                             document.getElementById("delaud").appendChild(a_aud);
+                      }
+                      else if(x.search(".mp4")!=-1){
+                        var vid = document.createElement("VIDEO");
+                              vid.setAttribute("src",x);
+                              vid.setAttribute("width", "320");
+                              vid.setAttribute("height", "240");
+                              vid.setAttribute("controls", "controls");
+                              vid.style.margin="10px 10px 10px 10px";
+                              var avid=document.createElement('A');
+                             avid.setAttribute("href","#");
+                             avid.onclick=function del(){
+                          $.get('/user_uploads/delete',{url:x},function(data){
+                            console.log("msg..",data);
+                            alert(data);
+                              });
+                             }
+                             avid.innerHTML="Delete";
+                             avid.appendChild(vid);
+                              document.getElementById("vid").appendChild(vid);
+                              document.getElementById("delvid").appendChild(avid);
+                      }
+                  })
+                  
+                })
+              }
+          //  },5000)
+            
+            $(".imgAdd").click(function(){
+                $(this).closest(".row").find('.imgAdd').before('<div class="col-sm-2 imgUp"><div class="imagePreview"></div><label class="btn btn-primary">Upload<input type="file" name="content" class="uploadFile img" value="Upload Photo" style="width:0px;height:0px;overflow:hidden;"></label><i class="fa fa-times del">-</i></div>');
+              });
+              $(document).on("click", "i.del" , function() {
+                  $(this).parent().remove();
+              });
+              $(function() {
+                var net=35;
+                $.get("/user_uploads/save",function(data){
+                  firebase.initializeApp(data.config);
+                  $(document).on("change",".uploadFile", function(e)
+                  {
+                      var uploadFile = $(this);
+                      var files = !!this.files ? this.files : [];
+                      if (!files.length || !window.FileReader) return; // no file selected, or no FileReader support
+                      if (/^image/.test( files[0].type)){ // only image file
+                        var file_details=e.target.files[0];
+                      console.log("target files[0]..",file_details);
+                        var calculated_size=Number(file_details.size)+data.total_size
+                        calculated_size=calculated_size/1000000;
+                      console.log("calculated size..",calculated_size);
+                      if(calculated_size<net){
+                      var storageRef=firebase.storage().ref(data.email+'/'+file_details.name);
+                      storageRef.put(file_details);
+                          var reader = new FileReader(); // instance of the FileReader
+                          reader.readAsDataURL(files[0]); // read the local file
+                          reader.onloadend = function(){ // set image data as background of div
+              uploadFile.closest(".imgUp").find('.imagePreview').css("background-image", "url("+this.result+")");
+            }
+          }
+          else{
+            alert("File size exceeds the storage limit.Please upgrade your plan to upload this file.")
+          }
+                      }
+                      else if(/^audio/.test( files[0].type)){
+                        var file_details=e.target.files[0];
+                      console.log("target files[0]..",file_details);
+                        var calculated_size=Number(file_details.size)+data.total_size
+                        calculated_size=calculated_size/1000000;
+                      console.log("calculated size..",calculated_size);
+                      if(calculated_size<net){
+                      var storageRef=firebase.storage().ref(data.email+'/'+file_details.name);
+                      storageRef.put(file_details);
+                          var reader = new FileReader(); // instance of the FileReader
+                          reader.readAsDataURL(files[0]); // read the local file
+                          reader.onloadend = function(){ // set image data as background of div
+                            var x=document.createElement('AUDIO')
+                            x.setAttribute("src",this.result);
+                            x.setAttribute("width", "160");
+                            x.setAttribute("height", "180");
+                            x.setAttribute("controls", "controls");
+                            uploadFile.closest(".imgUp").find('.imagePreview').append(x);
+            }
+          }
+          else{
+            alert("File size exceeds the storage limit.Please upgrade your plan to upload this file.")
+          }
+                      }
+                      else if (/^video/.test( files[0].type)){ // only video file
+                        var file_details=e.target.files[0];
+                      console.log("target files[0]..",file_details);
+                      var calculated_size=Number(file_details.size)+data.total_size
+                        calculated_size=calculated_size/1000000;
+                      console.log("calculated size..",calculated_size);
+                      if(calculated_size<net){
+                      var storageRef=firebase.storage().ref(data.email+'/'+file_details.name);
+                      storageRef.put(file_details);
+                          var reader = new FileReader(); // instance of the FileReader
+                          reader.readAsDataURL(files[0]); // read the local file
+                          reader.onloadend = function(){ // set image data as background of div
+                            var x=document.createElement('VIDEO')
+                            x.setAttribute("src",this.result);
+                            x.setAttribute("width", "160");
+                            x.setAttribute("height", "180");
+                            x.setAttribute("controls", "controls");
+                            uploadFile.closest(".imgUp").find('.imagePreview').append(x);
+                        }
+                      }
+                      else{
+                        alert("File size exceeds the storage limit.Please upgrade your plan to upload this file.")
+                      }
+                      }
+                      else{
+                        alert("File type not allowed!");
+                      }
+                  });
+                })
+              });
+          </script>
+    </body>
+</html>
