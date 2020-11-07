@@ -41,7 +41,7 @@
                             });
                             
                             $.get("/img_video_search/results",{term:nm,tags:tags.toString()});   
-                            for(var i=0; i<tags.length; i+=1){
+                            /*for(var i=0; i<tags.length; i+=1){
                                 splitted=tags[i].split(",");
                                 for(var j=0;j<splitted.length;j+=1){
                                     var button=document.createElement("BUTTON");
@@ -49,7 +49,7 @@
                                     button.innerHTML = splitted[j];
                                     document.body.appendChild(button);
                                 }                  
-                             }     
+                             }   */  
                              /*var but0=document.getElementById("0");
                              but0.onclick=location.href="/searchByTags?tag="+but0.innerHTML;
                              var but1=document.getElementById("1");
@@ -64,8 +64,8 @@
                              but5.onclick=location.href="http://localhost:5000/img_video_search/searchBy?tag="+but5.innerHTML;*/
                     }
                 })     
-                var br=document.createElement("br");
-                document.body.appendChild(br);
+                //var br=document.createElement("br");
+                //document.body.appendChild(br);
             if(tp=='Images'){
                 var URL = "https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(nm);
                         $.getJSON(URL, function(){

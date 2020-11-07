@@ -64,3 +64,9 @@ db.collection(collection_name).insert(obj,cb)
     db.collection(collection_name).updateOne(where,{$set:obj},cb);
   });
   }
+  module.exports.increament=function(collection_name,where,obj,cb){
+    connection.init(function(err,client){
+      var db=client.db("Quantavid");
+      db.collection(collection_name).updateOne(where,{$inc:obj},cb);
+    })
+  }
