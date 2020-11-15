@@ -1,7 +1,7 @@
 var connection = require("../config/connection");
 var firebase=require("firebase");
 var admin=require("firebase-admin");
-var serviceAccount=require("../serviceAccount/serviceAccountKey2.json");
+var serviceAccount=require("../serviceAccount/quantavid-web-de-b67d8122f58d.json");
 var path=require("path");
 //new:
 firebase.initializeApp({

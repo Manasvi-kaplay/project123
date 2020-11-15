@@ -1,12 +1,12 @@
 var express=require("express");
 var router=express.Router();
-//var allQueries=require("../model/allQueries");
+const {all}=require("firebase")
 var firebase=require("firebase");
 var admin=require("firebase-admin");
-var serviceAccount=require("../serviceAccount/serviceAccountKey2.json");
+var serviceAccount=require("../serviceAccount/quantavid-web-de-b67d8122f58d.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL:"quantavid-web-de.appspot.com",
+  databaseURL:"https://quantavid-web-de.firebaseio.com",
  // databaseURL: "https://aesthetic-nova-242210.firebaseio.com"
  //databaseURL: "https://quantavid-web-de.firebaseio.com",
  storageBucket: "quantavid-web-de.appspot.com"
@@ -23,10 +23,13 @@ router.get('/viewAll',function(req,res){
     var folderPath = email;
     var total_size=0;
     bucket.getFiles({ prefix: folderPath }, function(err, files) {
+      if(err){
+        console.log("Error..",err);
+      }
       var fileURLs = [] // array to hold all file urls 
       // files = array of file objects
       // not the contents of these files, we're not downloading the files. 
-      console.log("files.length...",files.length);
+      //console.log("files",files);
       for(var i=0;i<files.length;i+=1){
         total_size=total_size+Number(files[i].metadata.size)
         files[i].getSignedUrl(signedUrlConfig, function(err, fileURL) {
@@ -38,7 +41,6 @@ router.get('/viewAll',function(req,res){
         }
         });
       };
-      
   console.log("file size..",total_size);
     });
 })
@@ -64,19 +66,36 @@ var config={
 router.get('/delete',function(req,res){
   var url=req.query.url;
   var splitted=url.split("/");
-  console.log("splitted..",splitted);
+  //console.log("splitted..",splitted);
   var folderOld=splitted[4];
   var folder=folderOld.replace('%40','@');
-  console.log("folder..",folder);
+  //console.log("folder..",folder);
   var filePath=splitted[5].split("?");
   var file=filePath[0];
-  console.log("fileold..",file);
+  //console.log("fileold..",file);
   var fileNew=file.replace(/%20/g, ' ')
-  console.log("file..",fileNew);
+  //console.log("file..",fileNew);
   var bucket=admin.storage().bucket();
   var path=folder+"/"+fileNew;
   bucket.file(path).delete().then(function(){
-    res.json("File deleted successfully!");
+    //res.json("file deleted..")
+    var signedUrlConfig = { action: 'read', expires: '03-17-2025' }; 
+    var total_size=0;
+    bucket.getFiles({ prefix: folder }, function(err, files) {
+      var fileURLs = [] 
+      console.log("files.length...",files.length);
+      for(var i=0;i<files.length;i+=1){
+        total_size=total_size+Number(files[i].metadata.size)
+        files[i].getSignedUrl(signedUrlConfig, function(err, fileURL) {
+          fileURLs.push(fileURL);
+        if(fileURLs.length==files.length){
+          res.json({urls:fileURLs,total_size:total_size})
+        }
+        });
+      };
+  console.log("file size..",total_size);
+    });
+   // res.json("File deleted successfully!");
   })
   .catch(function(err){
     console.log("Error..",err);

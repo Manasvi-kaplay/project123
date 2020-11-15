@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "quantavid-web-de",
+  "private_key_id": "b67d8122f58d87908fed4ea0d5ea0f5f2e609b72",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCi7aiWlQFNcRBf\nsdzDQInk4Fb6M8jQdarqTtEh5QUmtOWU0v/7n1M7qZw/JXZTja7dWBLhXeg+D+SR\nHqzPm4ugswygdExIMMiFeCgMa4c9XNRiccK3yuE+hVjN5+Edr7vYCwPJl/8CC3vO\nUIP3hqgdJZMX/iF2SNCPGa2BSILhNREV2f75Zyi+6ZGQZCrvtFHAcEDmc95dh1XS\nfekuNIOm4AcpbRsBmGb+qI1yuzLajjXEa8aOMo4FSNeNe0nfZ3kNjHORp5qMR8tb\ngwiuJG7IJ7oWWYHQ4634TtSFUZP1npHn2mXPhrL2dGxhx9pzFP37gOdE9TwVx+X9\nU60O1GPnAgMBAAECggEAMfaioAbyvs5g4I+5LPFCODtpwNGXkAG9l5vy+ytxwHRy\nAQkRshaiXiX9wcmZtza4PK2RIKZ9HWcfRzd6dDH1iCLQSPZRHERFgdSep2xkLTel\n88iCF32yREt9N6uXt9RXzQFXuH8Rlw1xeovrZEFZlZKbwJxQo6bhujh8Iizb4fa3\n8nRzxGIWGsl79VU1RBOcjLzIwZ2BFiNwyU962WgsUVT6D6xyWZEz74BByp4hTsZa\naPhb2QfNCE4qjF++mBzY41hBMd2Ujlx4fRqwVtL+fT2wBwksvsISMdsgJTKhGiw9\nYCPmPTw/cIzj5Db+q2AQKcDWah6zvHkAoOtDcphBXQKBgQDcw21ghHHuiX22CZ6j\nwGl31gLV7OILi2Qd/8yLdKNH0IJ+Suda4Rm4/8SeKqzzIrN8GCEpllVuBOME4HJP\nLncN0hZMo5PmwnHigpa1rwE6XEcp3RlLLrumEvSAnjJ6L/xBvYJZhjT+lKcS+jtU\nHXnOdcB4fZ4lfdSk0zENhuYThQKBgQC87wthoQ1SPyiHORS8yd/wvnVSYrlcAZlB\nOg0YmQPsRr+FtvVcFVEQsVVMXYN+8agtzoVp5ADkaYvuJQqfc45RYnaSaS9vB6vg\nW0l1Ri9vfy3iqRZIdGDxw8WK64m9Ew6Y8ee4Z9U9hvk4JP0L5jq4lAmIjeqOiayi\nYzv5KbznewKBgAzQWxzrEyHhYSab0FV46aZHCcsZANXitWD4ZAsELiYQ+EIUXvFr\nd27BicwUdg12yiw9yk77puHH7tVtobTu4YIv25N/Oyp9xtZ69fx9t/iHOqo3Zyxx\n/fpZx09f31YwStgWA+bmX1UXk8sKMz9ipptRQma8A93xO9KFX6eFWP1xAoGAVEtz\nEIQCpYd4VZyqG/EV8RuIzNEvUlWEQw3befYLQgfuu4H9xq/cE06LeB7g5Gp9VrKl\n47DOlRpiTEZKjwnHnZgIvxofB7KshNU12RUPZPehSVeXkYwbFML8CBc+xRUTljmX\n4TaydVkbKGmYXQ7DdEbYWgy3chEK7QjJYUm19rECgYEAk2UpdU7skN5RojWoE6z4\nK8i1P5fXGoD93a/BFDRUSbRn49+c99K8YNPVzu0xDfAJnzmwmcTPRD7Zo6bwtQsE\nETYl8Mg0OL/+PfDG9PCRNmIIfd1Zr8STSwDPtpXyLzsovcqzqss2rx+0Q9nMt1wz\nqvhJi+7Zl8Akq9db/vy09MI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-98hfl@quantavid-web-de.iam.gserviceaccount.com",
+  "client_id": "100054896005741481417",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-98hfl%40quantavid-web-de.iam.gserviceaccount.com"
+}
