@@ -76,7 +76,7 @@
                             var api_key = "563492ad6f917000010000019f0cccef39434e3d85e53bfa58896c18";
                             $.ajax({
                                 method: 'GET',
-                                        beforeSend: function(xhr){
+                                beforeSend: function(xhr){
                                         xhr.setRequestHeader("Authorization", api_key);
                                     },
                                 url:"https://api.pexels.com/v1/curated?per_page=40",

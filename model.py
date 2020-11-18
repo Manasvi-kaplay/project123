@@ -14,15 +14,11 @@ from urllib.request import Request, urlopen
 import os
 import heapq
 import json
-
 def word_freq(web_url):
     response = requests.get(web_url)
-
     data = response.text
     soup = BeautifulSoup(data,'html.parser')
-
     paragraphs = soup.find_all('p')
-
     if(len(paragraphs)==0):
         req = Request(web_url , headers={"User-Agent": "Chrome"})
         data = urlopen(req).read()
@@ -33,7 +29,11 @@ def word_freq(web_url):
 
     for p in paragraphs:
         article_text += p.text
-
+        
+    title1=""
+    title = soup.find_all('h1')
+    for t in title:
+        title1+=t.text
     # Removing special characters and digits
     formatted_article_text = re.sub('[^a-zA-Z]', ' ', article_text )
     formatted_article_text = re.sub(r'\s+', ' ', formatted_article_text)
@@ -53,14 +53,14 @@ def word_freq(web_url):
     for word in word_frequencies.keys():
         word_frequencies[word] = (word_frequencies[word]/maximum_frequency)
     
-    return word_frequencies, article_text, formatted_article_text
+    return word_frequencies, article_text, formatted_article_text, title1
 
-def summarizer(web_url, num_sentences):
-    summary_list = []
+def summarizer(web_url, num_sentences = 7):
+
     word_freqs = word_freq(web_url)
     word_frequencies = word_freqs[0]
     article_text = word_freqs[1]
-    #article_before_summ = word_freqs[2]
+    article_before_summ = word_freqs[2]
     
     sentence_list = nltk.sent_tokenize(article_text)
     sentence_scores = {}
@@ -73,15 +73,22 @@ def summarizer(web_url, num_sentences):
                     else:
                         sentence_scores[sent] += word_frequencies[word]
 
-    summary_sentences = heapq.nlargest(num_sentences, sentence_scores.items(), key=itemgetter(1))
+    
     sc=[]
-    summary=''
+    summary = "Title: "+ word_freqs[3] + list(sentence_scores)[0]
+    summary_list = []
+    summary_list.append(summary)
+    summ_end = list(sentence_scores)[-1]
+    sentence_scores = dict(list(sentence_scores.items())[1:-1])
+    summary_sentences = heapq.nlargest(num_sentences-2, sentence_scores.items(), key=itemgetter(1))
     for i in summary_sentences:
         sc.append(i[1])
     for key,value in sentence_scores.items():
         if value in sc:
             summary += key
             summary_list.append(unicodedata.normalize("NFKD", key))
+    summary = summary+summ_end
+    summary_list.append(summ_end)
     sent_key = []
     scene_duration=[]
     for i in range(len(summary_list)):
@@ -101,10 +108,9 @@ def summarizer(web_url, num_sentences):
             if j in word_frequencies.keys():
                 sent_score[j] = word_frequencies[j]
         sent_key.append(heapq.nlargest(2, sent_score, key=sent_score.get))
-    #return summary, summary_list, article_before_summ, sent_key
-    return summary, summary_list, sent_key,scene_duration
+    return summary, summary_list, article_before_summ, sent_key,scene_duration
 
-def n_freq_words(web_url, n):
+def n_freq_words(web_url, n=2):
     word_frequencies = word_freq(web_url)[0]
     for i in ['a','an', 'the', 'A', 'An', 'The']:
         word_frequencies.pop(i, 'No Key found')
@@ -114,25 +120,19 @@ def n_freq_words(web_url, n):
     return freq_words
 
 
+#def down_imgs(web_url, parent_directory = os.getcwd()):
 def down_imgs(web_url):
     response = requests.get(web_url)
-
     data = response.text
     soup = BeautifulSoup(data,'html.parser')
-
     paragraphs = soup.find_all('p')
-
     if(len(paragraphs)==0):
         req = Request(web_url , headers={"User-Agent": "Chrome"})
         data = urlopen(req).read()
-    
     soup = BeautifulSoup(data, 'html.parser')
-    
     img = soup.find_all("img")
-    
     res = [i for i in range(len(web_url)) if web_url.startswith('/', i)]
     website = web_url[: res[2]]
-    
     urls = []
     width = []
     urlss = []
@@ -189,6 +189,7 @@ def down_imgs(web_url):
                     img_urls_save.append(k)
     return img_urls_save
     
+    
     # names = []
     # img_urls_uncommon = []
     # for k in img_urls_save:
@@ -236,28 +237,29 @@ def down_imgs(web_url):
 
 
 web_url = sys.argv[1]
-#web_url=input("Enter the url")
 num_sentences = 7
 n_freq = 2
-full_text=word_freq(web_url)[2]
-summary=summarizer(web_url, num_sentences)
+su = summarizer(web_url, num_sentences)
 freq=n_freq_words(web_url, n_freq)
 srcs=down_imgs(web_url)
-#obj1={
-    #"full_text":full_text
-#}
 obj={
-    "summary":summary[0],
-    "summarized_sentences":summary[1],
-    "full_text":full_text,
-    "keywords":summary[2],
-    "freq":freq,
-    "srcs":srcs,
-    "scene_duration":summary[3]
+"summary":su[0],
+"summarized_sentences":su[1],
+"full_text":su[2],
+"keywords":su[3],
+"freq":freq,
+"srcs":srcs,
+"scene_duration":su[4]
 }
-#ob1=json.dumps(obj1)
 ob=json.dumps(obj)
-#print(ob1)
 print(ob)
-
-
+    # print("\nDo you want to change the directory of the images to be downloaded? \n 1-> Yes \n 2-> No \nNote: Default Directory is Downloaded_Images folder, which will be created in the current directory.")
+    # q = int(input("Enter 1 for Yes, 2 for No: "))
+    # if(q==1):
+    #     parent_directory = input("Enter the parent directory to which images are to be downloaded: ")
+    #     q1 = down_imgs(web_url, parent_directory)
+        
+    # else:
+    #     q1 = down_imgs(web_url)
+    # print("\nThe urls of the imgaes downloaded are:")
+    # print(q1)

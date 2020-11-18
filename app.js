@@ -22,18 +22,34 @@ const { json } = require("body-parser");
   var link=req.body.link;
   var videos=[];
   var images=[];
+  var pexel_videos=[];
   var API_KEY = '18525176-9375201fa157d3b13491d8253';
+  var api_key="563492ad6f917000010000019f0cccef39434e3d85e53bfa58896c18";
   const python2 = spawn('python', ['model.py',link]);
   python2.stdout.on('data', function (data) {
    console.log('Pipe data from python script ...');
    dataToSend=data.toString();
   });
   python2.on('close', (code) => {
-    var obj=JSON.parse(dataToSend);
+    if(dataToSend==undefined || dataToSend=='\r\n'){
+      res.status(400).json({status:0,msg:"Cannot retrieve data from the website due to security issues.Please copy/paste or write the text"})
+    }
+    else{
+      var obj=JSON.parse(dataToSend);
     var search=obj.freq[0].concat(" ").concat(obj.freq[1]);
     console.log("search..",search)
     var videoUrl = "https://pixabay.com/api/videos/?key="+API_KEY+"&q="+encodeURIComponent(search);
+    var pixelVideoUrl=" https://api.pexels.com/videos/search?query="+search+"&per_page=40";
     var imgUrl="https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(obj.freq[0]);
+    request(pixelVideoUrl,{headers:{Authorization:api_key},json:true},function(pixelErr,pixelResp,pixelBody){
+      if(pixelErr){ return console.log(pixelErr); }
+      for(var k=0;k<pixelBody.videos.length;k+=1){
+        pexel_videos.push(pixelBody.videos[k].video_files[0].link)
+        pexel_videos.push(pixelBody.videos[k].video_files[1].link)
+      }
+      console.log("pexel videos array..",pexel_videos);
+      obj.pexel_videos=pexel_videos
+    })
     request(videoUrl,{json:true},function(err,resp,body){
       if (err) { return console.log(err); }
   if(body.hits.length>0){
@@ -57,6 +73,7 @@ const { json } = require("body-parser");
     })
   }
     })
+    }
   });
  })
 app.use(require("./controller/default"));
