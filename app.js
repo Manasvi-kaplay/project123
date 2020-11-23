@@ -3,7 +3,7 @@ var app=express();
 var bodyParser=require("body-parser");
 var fileupload=require("express-fileupload");
 var session=require("express-session")
-var request=require("request");
+var request=require("request-promise");
 app.use(bodyParser.urlencoded({
     extended:false,
     limit:'50mb'
@@ -20,61 +20,84 @@ const { json } = require("body-parser");
  app.post('/data', (req, res) => {
   var dataToSend;
   var link=req.body.link;
-  var videos=[];
-  var images=[];
-  var pexel_videos=[];
-  var API_KEY = '18525176-9375201fa157d3b13491d8253';
-  var api_key="563492ad6f917000010000019f0cccef39434e3d85e53bfa58896c18";
-  const python2 = spawn('python', ['model.py',link]);
+  const python2 = spawn('python', ['summary.py',link]);
   python2.stdout.on('data', function (data) {
    console.log('Pipe data from python script ...');
    dataToSend=data.toString();
   });
   python2.on('close', (code) => {
-    if(dataToSend==undefined || dataToSend=='\r\n'){
-      res.status(400).json({status:0,msg:"Cannot retrieve data from the website due to security issues.Please copy/paste or write the text"})
+    console.log("dataToSend..",dataToSend);
+    if(dataToSend==undefined){
+      res.status(400).json({status:0,msg:"Cannot retrieve data from the website due to security issues.Please copy/paste or write the text"});
     }
     else{
       var obj=JSON.parse(dataToSend);
-    var search=obj.freq[0].concat(" ").concat(obj.freq[1]);
-    console.log("search..",search)
-    var videoUrl = "https://pixabay.com/api/videos/?key="+API_KEY+"&q="+encodeURIComponent(search);
-    var pixelVideoUrl=" https://api.pexels.com/videos/search?query="+search+"&per_page=40";
-    var imgUrl="https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(obj.freq[0]);
-    request(pixelVideoUrl,{headers:{Authorization:api_key},json:true},function(pixelErr,pixelResp,pixelBody){
-      if(pixelErr){ return console.log(pixelErr); }
-      for(var k=0;k<pixelBody.videos.length;k+=1){
-        pexel_videos.push(pixelBody.videos[k].video_files[0].link)
-        pexel_videos.push(pixelBody.videos[k].video_files[1].link)
-      }
-      console.log("pexel videos array..",pexel_videos);
-      obj.pexel_videos=pexel_videos
-    })
-    request(videoUrl,{json:true},function(err,resp,body){
-      if (err) { return console.log(err); }
-  if(body.hits.length>0){
-    for(var i=0;i<body.hits.length;i+=1){
-      videos.push(body.hits[i].videos.medium.url);
-    }
-    obj.videos=videos;
     res.status(200).json({status:1,result:obj});
-  }
-  else{
-    console.log("irrelavant videos...")
-    request(imgUrl,{json:true},function(err2,resp2,body2){
-      if (err2) { return console.log(err); }
-      if(body2.hits.length>0){
-        for(var j=0;j<body2.hits.length;j+=1){
-          images.push(body2.hits[j].previewURL);
-        }
-        obj.images=images;
-        res.status(200).json({status:1,result:obj});
-      }
-    })
-  }
-    })
     }
   });
+ })
+ app.post('/multimedia',function(req,res){
+  var API_KEY = '18525176-9375201fa157d3b13491d8253';
+  var summary=req.body.summary;
+  var dataSent;
+  var urls=[];
+  var imgurls=[];
+  const python2 = spawn('python', ['model.py',summary]);
+  python2.stdout.on('data', function (data) {
+   console.log('Pipe data from python script ...');
+   dataSent=data.toString();
+  });
+  python2.on('close', (code) => {
+   // console.log("dataSent..",dataSent);
+    if(dataSent==undefined){
+      res.status(400).json({status:0,msg:"Cannot retrieve data from the website due to security issues.Please copy/paste or write the text"});
+    }
+    else{
+      var obj=JSON.parse(dataSent);
+      var search;
+      for(var i=0;i<obj.keywords.length;i+=1){
+        search=obj.keywords[i].join(' ');
+        //console.log("word..",obj.keywords[i][0])
+        urls.push("https://pixabay.com/api/videos/?key="+API_KEY+"&q="+encodeURIComponent(search))
+        imgurls.push("https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(obj.keywords[i][0]))
+      }
+      var requestAsync = function(url) {
+        return new Promise((resolve, reject) => {
+            var req = request(url, (err, response, body) => {
+                if (err) return reject(err, response, body);
+                resolve(JSON.parse(body));
+            });
+        });
+    };
+    var getParallel = async function(obj) {
+      //transform requests into Promises, await all
+      try {
+          var data = await Promise.all(urls.map(requestAsync));
+          var imgdata= await Promise.all(imgurls.map(requestAsync));
+      } catch (err) {
+          console.error(err);
+      }
+      console.log("data.length..",data.length);
+      console.log("imgdata.length..",imgdata.length);
+      var ob;
+      var multimedia=[]
+      for(var k=0;k<data.length;k+=1){
+        if(data[k].hits.length>0){
+          ob={[k]:data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url}
+          multimedia.push(ob);
+        }
+        else{
+          ob={[k]:imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL}
+          multimedia.push(ob)
+        }
+      }
+      console.log("multimedia array..",multimedia);
+      obj.multimedia=multimedia;
+      res.status(200).json({status:1,result:obj});
+  }
+  getParallel(obj);
+    }
+  })
  })
 app.use(require("./controller/default"));
 app.listen(process.env.PORT || 5000,function(){
