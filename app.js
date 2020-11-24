@@ -82,7 +82,7 @@ const { json } = require("body-parser");
       var ob;
       var multimedia=[]
       for(var k=0;k<data.length;k+=1){
-        if(data[k].hits.length>0){
+        if(data[k].hits.length>0 && multimedia.indexOf(data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url)==-1){
           ob={[k]:data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url}
           multimedia.push(ob);
         }

@@ -3,18 +3,25 @@ from bs4 import BeautifulSoup
 import requests
 import re
 from operator import itemgetter
+import unicodedata
 import nltk
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.corpus import stopwords
+from string import punctuation
 from urllib.request import Request, urlopen
-import heapq
 import json
+import os
+import heapq
 
 def word_freq(web_url):
     response = requests.get(web_url)
+
     data = response.text
     soup = BeautifulSoup(data,'html.parser')
+
     paragraphs = soup.find_all('p')
+
     if(len(paragraphs)==0):
         req = Request(web_url , headers={"User-Agent": "Chrome"})
         data = urlopen(req).read()
@@ -33,7 +40,7 @@ def word_freq(web_url):
     # Removing special characters and digits
     formatted_article_text = re.sub('[^a-zA-Z]', ' ', article_text )
     formatted_article_text = re.sub(r'\s+', ' ', formatted_article_text)
-    formatted_article_text = re.sub(r'\r\n', '', formatted_article_text)
+
     stopwords = nltk.corpus.stopwords.words('english')
 
     word_frequencies = {}
@@ -52,10 +59,12 @@ def word_freq(web_url):
     return word_frequencies, article_text, formatted_article_text, title1
 
 def summarizer(web_url, num_sentences = 7):
+
     word_freqs = word_freq(web_url)
     word_frequencies = word_freqs[0]
     article_text = word_freqs[1]
     article_before_summ = word_freqs[2]
+    
     sentence_list = nltk.sent_tokenize(article_text)
     sentence_scores = {}
     for sent in sentence_list:
@@ -66,8 +75,12 @@ def summarizer(web_url, num_sentences = 7):
                         sentence_scores[sent] = word_frequencies[word]
                     else:
                         sentence_scores[sent] += word_frequencies[word]
+
+    
     sc=[]
     summary = "Title: "+ word_freqs[3] + list(sentence_scores)[0]
+    summary_list = []
+    summary_list.append(summary)
     summ_end = list(sentence_scores)[-1]
     sentence_scores = dict(list(sentence_scores.items())[1:-1])
     summary_sentences = heapq.nlargest(num_sentences-2, sentence_scores.items(), key=itemgetter(1))
@@ -76,21 +89,41 @@ def summarizer(web_url, num_sentences = 7):
     for key,value in sentence_scores.items():
         if value in sc:
             summary += key
+            summary_list.append(unicodedata.normalize("NFKD", key))
     summary = summary+summ_end
-    return summary, article_before_summ
+    summary_list.append(summ_end)
+    sent_key = []
+    for i in range(len(summary_list)):
+        sent_score={}
+        s =summary_list[i].replace(',', '')
+        s= s.replace('.','')
+        sent = s.split()
+        for j in sent:
+            j=j.lower()
+            if j in word_frequencies.keys():
+                sent_score[j] = word_frequencies[j]
+        sent_key.append(heapq.nlargest(2, sent_score, key=sent_score.get))
+    return summary, summary_list, article_before_summ, sent_key
 
 def down_imgs(web_url):
     response = requests.get(web_url)
+
     data = response.text
     soup = BeautifulSoup(data,'html.parser')
+
     paragraphs = soup.find_all('p')
+
     if(len(paragraphs)==0):
         req = Request(web_url , headers={"User-Agent": "Chrome"})
         data = urlopen(req).read()
+    
     soup = BeautifulSoup(data, 'html.parser')
+    
     img = soup.find_all("img")
+    
     res = [i for i in range(len(web_url)) if web_url.startswith('/', i)]
     website = web_url[: res[2]]
+    
     urls = []
     width = []
     urlss = []
@@ -147,14 +180,15 @@ def down_imgs(web_url):
                     img_urls_save.append(k)
     return img_urls_save
     
+    
 web_url = sys.argv[1]
 num_sentences = 7
 n_freq = 2
 su = summarizer(web_url, num_sentences)
-srcs=down_imgs(web_url)
+srcs = down_imgs(web_url)
 obj={
 "summary":su[0],
-"full_text":su[1],
+"full_text":su[2],
 "srcs":srcs
 }
 ob=json.dumps(obj)
