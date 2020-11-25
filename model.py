@@ -76,15 +76,16 @@ def frequency(summary):
             if j in word_frequencies.keys():
                 sent_score[j] = word_frequencies[j]
         sent_key.append(heapq.nlargest(2, sent_score, key=sent_score.get))
+    for i in ['a','an', 'the', 'A', 'An', 'The']:
+        word_frequencies.pop(i, 'No Key found')
+    freq_words = heapq.nlargest(2, word_frequencies, key=word_frequencies.get)
     
-    
-    return sentence_list,sent_key,scene_duration
+    return sentence_list,sent_key,scene_duration,freq_words
 
 # def n_freq_words(web_url, n=2):
 #     word_frequencies = word_freq(web_url)[0]
 #     for i in ['a','an', 'the', 'A', 'An', 'The']:
-#         word_frequencies.pop(i, 'No Key found')
-
+#     word_frequencies.pop(i, 'No Key found')
 #     freq_words = heapq.nlargest(n, word_frequencies, key=word_frequencies.get)
 #     return freq_words
 
@@ -94,7 +95,7 @@ su = frequency(summary)
 obj={
 "summarized_sentences":su[0],
 "keywords":su[1],
-#"freq":freq,
+"freq":su[3],
 "scene_duration":su[2]
 }
 ob=json.dumps(obj)

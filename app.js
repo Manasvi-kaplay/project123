@@ -54,6 +54,7 @@ const { json } = require("body-parser");
     }
     else{
       var obj=JSON.parse(dataSent);
+      //console.log("obj..",obj);
       var search;
       for(var i=0;i<obj.keywords.length;i+=1){
         search=obj.keywords[i].join(' ');
@@ -61,6 +62,7 @@ const { json } = require("body-parser");
         urls.push("https://pixabay.com/api/videos/?key="+API_KEY+"&q="+encodeURIComponent(search))
         imgurls.push("https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(obj.keywords[i][0]))
       }
+      imgurls.push("https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(obj.freq[0]))
       var requestAsync = function(url) {
         return new Promise((resolve, reject) => {
             var req = request(url, (err, response, body) => {
@@ -78,17 +80,28 @@ const { json } = require("body-parser");
           console.error(err);
       }
       console.log("data.length..",data.length);
-      console.log("imgdata.length..",imgdata.length);
+      var imglength=imgdata.length;
+      console.log("imgdata.length..",imglength);
       var ob;
       var multimedia=[]
       for(var k=0;k<data.length;k+=1){
         if(data[k].hits.length>0 && multimedia.indexOf(data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url)==-1){
           ob={[k]:data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url}
+          //console.log("ob..",ob);
+          multimedia.push(ob);
+        }
+        else if(imgdata[k].hits.length>0){
+          ob={[k]:imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL}
+          //console.log("ob..",ob);
+          multimedia.push(ob)
+        }
+        else if(imgdata[imglength-1].hits.length>0){
+          ob={[k]:imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL}
+          //console.log("ob..",ob);
           multimedia.push(ob);
         }
         else{
-          ob={[k]:imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL}
-          multimedia.push(ob)
+          ob={[k]:"No image/video available"}
         }
       }
       console.log("multimedia array..",multimedia);
