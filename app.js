@@ -102,6 +102,7 @@ const { json } = require("body-parser");
         }
         else{
           ob={[k]:"No image/video available"}
+          multimedia.push(ob);
         }
       }
       console.log("multimedia array..",multimedia);
