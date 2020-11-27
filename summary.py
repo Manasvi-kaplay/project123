@@ -3,16 +3,17 @@ from bs4 import BeautifulSoup
 import requests
 import re
 from operator import itemgetter
+#from PIL import Image
 import unicodedata
 import nltk
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize, sent_tokenize
-from nltk.corpus import stopwords
 from string import punctuation
 from urllib.request import Request, urlopen
 import json
 import os
 import heapq
+
 
 def word_freq(web_url):
     response = requests.get(web_url)
@@ -31,7 +32,9 @@ def word_freq(web_url):
     article_text = ""
 
     for p in paragraphs:
-        article_text += p.text
+        article_text += p.text 
+        
+        
         
     title1=""
     title = soup.find_all('h1')
@@ -78,7 +81,7 @@ def summarizer(web_url, num_sentences = 7):
 
     
     sc=[]
-    summary = "Title: "+ word_freqs[3] + list(sentence_scores)[0]
+    summary = "Title: "+ word_freqs[3] + ". Summary: " + list(sentence_scores)[0]
     summary_list = []
     summary_list.append(summary)
     summ_end = list(sentence_scores)[-1]
@@ -88,9 +91,10 @@ def summarizer(web_url, num_sentences = 7):
         sc.append(i[1])
     for key,value in sentence_scores.items():
         if value in sc:
+            summary += " "
             summary += key
             summary_list.append(unicodedata.normalize("NFKD", key))
-    summary = summary+summ_end
+    summary = summary+ " " + summ_end
     summary_list.append(summ_end)
     sent_key = []
     for i in range(len(summary_list)):
@@ -104,6 +108,16 @@ def summarizer(web_url, num_sentences = 7):
                 sent_score[j] = word_frequencies[j]
         sent_key.append(heapq.nlargest(2, sent_score, key=sent_score.get))
     return summary, summary_list, article_before_summ, sent_key
+
+def n_freq_words(web_url, n=2):
+    word_frequencies = word_freq(web_url)[0]
+    for i in ['a','an', 'the', 'A', 'An', 'The']:
+        word_frequencies.pop(i, 'No Key found')
+
+    freq_words = heapq.nlargest(n, word_frequencies, key=word_frequencies.get)
+    
+    return freq_words
+
 
 def down_imgs(web_url):
     response = requests.get(web_url)
@@ -179,8 +193,7 @@ def down_imgs(web_url):
                 if(len(k)!=0):
                     img_urls_save.append(k)
     return img_urls_save
-    
-    
+
 web_url = sys.argv[1]
 num_sentences = 7
 n_freq = 2

@@ -1,65 +1,41 @@
 import sys
-import re
 from operator import itemgetter
-import unicodedata
+import re
 import nltk
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize, sent_tokenize
-#from string import punctuation
-#from urllib.request import Request, urlopen
-#import os
+from nltk.corpus import stopwords
+from string import punctuation
+from urllib.request import Request, urlopen
 import heapq
 import json
-def word_freq(summary):
+
+def key_words_of_each_sent(article_text):
+    sentence_list = nltk.sent_tokenize(article_text)
+    # Removing special characters and digits
+    formatted_article_text = re.sub('[^a-zA-Z]', ' ', article_text )
+    formatted_article_text = re.sub(r'\s+', ' ', formatted_article_text)
+    formatted_article_text= formatted_article_text.lower()
+    
     stopwords = nltk.corpus.stopwords.words('english')
     word_frequencies = {}
-    #print(word_tokenize(summary))
-    for word in word_tokenize(summary):
+    for word in nltk.word_tokenize(formatted_article_text):
         if word not in stopwords:
             if word not in word_frequencies.keys():
                 word_frequencies[word] = 1
             else:
                 word_frequencies[word] += 1
-
+    
     maximum_frequency = max(word_frequencies.values())
+    
     for word in word_frequencies.keys():
         word_frequencies[word] = (word_frequencies[word]/maximum_frequency)
-    return word_frequencies
-
-def frequency(summary):
-    word_frequencies = word_freq(summary)
-    #sentence_list = nltk.tokenize.sent_tokenize(summ)
-    sentence_list=re.split(r' *[\.\?!][\'"\)\]]* *', summary)
-    #print("sentence_list..",sentence_list)
-    num_sentences=len(sentence_list)
-    #print("sentence_list length..",num_sentences)
-    sentence_scores = {}
-    for sent in sentence_list:
-        for word in nltk.word_tokenize(sent.lower()):
-            if word in word_frequencies.keys():
-                if len(sent.split(' ')) < 30:
-                    if sent not in sentence_scores.keys():
-                        sentence_scores[sent] = word_frequencies[word]
-                    else:
-                        sentence_scores[sent] += word_frequencies[word]
-    sc=[]
-    first=list(sentence_scores)[0]
-    summary_list = []
-    summary_list.append(first)
-    #print(sentence_scores)
-    summ_end = list(sentence_scores)[-1]
-    sentence_scores = dict(list(sentence_scores.items())[1:-1])
-    summary_sentences = heapq.nlargest(num_sentences-3, sentence_scores.items(), key=itemgetter(1))
-    for i in summary_sentences:
-        sc.append(i[1])
-    for key,value in sentence_scores.items():
-        if value in sc:
-            summary_list.append(unicodedata.normalize("NFKD", key))
-    summary_list.append(summ_end)
+    
+    
     sent_key = []
     scene_duration=[]
-    for i in range(len(summary_list)):
-        words=len(summary_list[i].split())
+    for i in range(len(sentence_list)):
+        words=len(sentence_list[i].split())
         if(words<=10):
             scene_duration.append(4)
         elif(words>10 and words<=15):
@@ -67,9 +43,8 @@ def frequency(summary):
         else:
             scene_duration.append(6)
         sent_score={}
-        s =summary_list[i].replace(',', '')
+        s =sentence_list[i].replace(',', '')
         s= s.replace('.','')
-        s=s.replace('|','')
         sent = s.split()
         for j in sent:
             j=j.lower()
@@ -79,24 +54,19 @@ def frequency(summary):
     for i in ['a','an', 'the', 'A', 'An', 'The']:
         word_frequencies.pop(i, 'No Key found')
     freq_words = heapq.nlargest(2, word_frequencies, key=word_frequencies.get)
+    return sentence_list, sent_key,scene_duration,freq_words
     
-    return sentence_list,sent_key,scene_duration,freq_words
-
-# def n_freq_words(web_url, n=2):
-#     word_frequencies = word_freq(web_url)[0]
-#     for i in ['a','an', 'the', 'A', 'An', 'The']:
-#     word_frequencies.pop(i, 'No Key found')
-#     freq_words = heapq.nlargest(n, word_frequencies, key=word_frequencies.get)
-#     return freq_words
-
-summary = sys.argv[1]
-su = frequency(summary)
-#freq=n_freq_words(web_url, n_freq)
+article_text = sys.argv[1]
+article_text = re.sub(r'(?<=[.,])(?=[^\s])', r' ', article_text)
+result = key_words_of_each_sent(article_text)    
 obj={
-"summarized_sentences":su[0],
-"keywords":su[1],
-"freq":su[3],
-"scene_duration":su[2]
+"summarized_sentences":result[0],
+"keywords":result[1],
+"freq":result[3],
+"scene_duration":result[2]
 }
 ob=json.dumps(obj)
 print(ob)
+
+
+
