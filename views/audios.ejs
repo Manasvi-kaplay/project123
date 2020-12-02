@@ -1,0 +1,90 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+.dropbtn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: relative;
+  background-color: #f1f1f1;
+  min-width: 140px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+</style>
+</head>
+<body>
+<br><center>
+<div class="dropdown">
+  <button class="dropbtn">Select category
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <div class="dropdown-content">
+    <%genres.forEach(function(x){%>
+        <a onclick="getAudios(this)" id="<%=x%>"><%=x%></a>
+    <%})%>
+  </div>
+</div>
+
+</center>
+<div id="audios"></div>
+<script>
+    function getAudios(a){
+        //$("#audios").load(" #audios > *")
+        $("#audios").empty();
+        var selectedGenre=a.innerHTML
+        console.log("selected..",selectedGenre);
+        $.get("/audios/search",{genre:selectedGenre},function(data){
+            console.log("data..",data);
+            var h2 = document.createElement("H2");                       
+            var t = document.createTextNode(selectedGenre);      
+            h2.appendChild(t); 
+            document.getElementById("audios").appendChild(h2);
+            console.log("data..",data);
+            var h4 = document.createElement("H4");                       
+            var t2 = document.createTextNode("Total results: "+data.total);      
+            h4.appendChild(t2); 
+            document.getElementById("audios").appendChild(h4);
+            //document.getElementById("audios").innerHTML="Total results: "+data.total;
+            for(var i=0;i<data.result.length;i+=1){
+              var aud=document.createElement("AUDIO");
+              aud.setAttribute("src",data.result[i]);
+                        aud.setAttribute("width","228");
+                        aud.setAttribute("height","50");
+                        aud.setAttribute("controls", "controls");
+                        aud.setAttribute("onmouseover","this.play()");
+                            aud.setAttribute("onmouseout","this.pause();this.currentTime=0;");
+                        aud.style.margin="10px 10px 10px 10px";
+                        document.getElementById("audios").appendChild(aud);
+            }
+        })
+    }
+    </script>
+</body>
+</html>

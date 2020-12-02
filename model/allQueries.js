@@ -58,10 +58,10 @@ db.collection(collection_name).insert(obj,cb)
   db.collection(collection_name).find(obj).toArray(cb);
   });
   }
-  module.exports.update=function(collection_name,where,obj,cb){
+  module.exports.update=function(collection_name,where,obj,appendObj,cb){
     connection.init(function(err,client){
       var db=client.db("Quantavid");
-    db.collection(collection_name).updateOne(where,{$set:obj},cb);
+    db.collection(collection_name).updateOne(where,{$set:obj,$push:appendObj},cb);
   });
   }
   module.exports.increament=function(collection_name,where,obj,cb){

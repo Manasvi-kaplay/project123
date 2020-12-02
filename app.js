@@ -17,9 +17,6 @@ app.set("view engine","ejs");
 app.use(session({secret:"TSS",saveUninitialized:true}))
 const {spawn} = require('child_process');
 const { json } = require("body-parser");
-var alph=[{'0':'a'},{'1':'a'},{'2':'b'}];
-console.log(Object.values(alph[0]));
-
  app.post('/data', (req, res) => {
   var dataToSend;
   var link=req.body.link;
