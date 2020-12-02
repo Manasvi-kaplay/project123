@@ -2,14 +2,13 @@ var connection = require("../config/connection");
 var firebase=require("firebase");
 var admin=require("firebase-admin");
 var serviceAccount=require("../serviceAccount/quantavid-web-de-b67d8122f58d.json");
-var path=require("path");
 //new:
-firebase.initializeApp({
+/*firebase.initializeApp({
     apiKey: "AIzaSyBb7WBShTspeZkDX42Bb-J_U4VFtTc_Nvk",
     authDomain:"quantavid-web-de.firebaseapp.com",
     databaseURL: "https://quantavid-web-de.firebaseio.com",
     storageBucket: "quantavid-web-de.appspot.com"
-  });
+  });*/
   /*admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       databaseURL:"quantavid-web-de.appspot.com",

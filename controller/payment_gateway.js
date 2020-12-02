@@ -7,8 +7,12 @@ router.get('/pay',function(req,res){
   res.render("layout",pagedata);
 })
 router.get('/get',function(req,res){
-    stripe.charges.retrieve('ch_1HqejzJag2Djgj0uj1Or5b9u', {
+    stripe.charges.retrieve('ch_1HtbrEJag2Djgj0uUO0OSFO8', {
         api_key: 'sk_test_51HqeWpJag2Djgj0ucTIInopI9lQKekdORucuXNfmhHcJZpDSYrU5Ohpejj5PsllaerHP6gfRdVaQroxH6yzg91lq001Zgp2EWr'
+      },function(err,result){
+if(result){
+  res.status(200).json({status:1,result:result})
+}
       });
 })
 router.post('/create',function(req,res){
@@ -23,12 +27,11 @@ let seconds = date_ob.getSeconds();
 var date_time=year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds
 console.log(date_time);
   var email="manasvi111.kaplay@gmail.com";
+  var plan="Premium";
   stripe.charges.create({
-   // customer:email,
      amount: 10000,
      currency: "inr",
      source: req.body.stripeToken, // obtained with Stripe.js
-     // email:email,
      receipt_email:email,
      description: "For testing purpose"
    }, function(err, charge) {
@@ -40,7 +43,7 @@ console.log(date_time);
      if(charge){
        console.log("charge..",charge);
        var charge_id=charge.id;
-       allQueries.update("users",{email:email},{plan:"Premium"},{payment_date:date_time,charge_ids:charge_id},function(error,result){
+       allQueries.update("users",{email:email},{plan:plan},{payment_date:date_time,charge_ids:charge_id},function(error,result){
          if(error){
           res.status(400).json({status:0,error:error});
          }
@@ -54,6 +57,27 @@ console.log(date_time);
 })
 router.get('/:email',function(req,res){
   var email=req.params.email;
+  allQueries.find("users",{email:email},function(err,result){
+if(err){
+  res.status(400).json({status:0,error:err});
+}
+if(result){
+res.status(200).json({status:1,result:result[0]})
+async function retrieve(){
+  for(var i=0;i<result[0].charge_ids.length;i+=1){
+    await stripe.charges.retrieve('ch_1HtbrEJag2Djgj0uUO0OSFO8', {
+      api_key: 'sk_test_51HqeWpJag2Djgj0ucTIInopI9lQKekdORucuXNfmhHcJZpDSYrU5Ohpejj5PsllaerHP6gfRdVaQroxH6yzg91lq001Zgp2EWr'
+    },function(err2,stripeResult){
+if(stripeResult){
+//res.status(200).json({status:1,result:result})
+console.log("stripe charge obj..",stripeResult);
+}
+    });
+  }
+}
+retrieve();
+}
 
+  })
 })
 module.exports=router;
