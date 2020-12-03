@@ -7,13 +7,10 @@ router.get('/pay',function(req,res){
   res.render("layout",pagedata);
 })
 router.get('/get',function(req,res){
-    stripe.charges.retrieve('ch_1HtbrEJag2Djgj0uUO0OSFO8', {
+    var ret=stripe.charges.retrieve('ch_1HtbrEJag2Djgj0uUO0OSFO8', {
         api_key: 'sk_test_51HqeWpJag2Djgj0ucTIInopI9lQKekdORucuXNfmhHcJZpDSYrU5Ohpejj5PsllaerHP6gfRdVaQroxH6yzg91lq001Zgp2EWr'
-      },function(err,result){
-if(result){
-  res.status(200).json({status:1,result:result})
-}
-      });
+      })
+      console.log("ret..",ret);
 })
 router.post('/create',function(req,res){
   console.log("req.body..",req.body);
@@ -63,14 +60,19 @@ if(err){
 }
 if(result){
 res.status(200).json({status:1,result:result[0]})
+var details=[];
+var detailsObj;
 async function retrieve(){
   for(var i=0;i<result[0].charge_ids.length;i+=1){
-    await stripe.charges.retrieve('ch_1HtbrEJag2Djgj0uUO0OSFO8', {
+    await stripe.charges.retrieve(result[0].charge_ids[i], {
       api_key: 'sk_test_51HqeWpJag2Djgj0ucTIInopI9lQKekdORucuXNfmhHcJZpDSYrU5Ohpejj5PsllaerHP6gfRdVaQroxH6yzg91lq001Zgp2EWr'
     },function(err2,stripeResult){
 if(stripeResult){
 //res.status(200).json({status:1,result:result})
 console.log("stripe charge obj..",stripeResult);
+detailsObj={"charge_id":stripeResult.id,"amount":stripeResult.amount,"receipt_url":stripeResult.receipt_url,"payment_method":stripeResult.payment_method}
+details.push(detailsObj);
+console.log("details array..",details);
 }
     });
   }

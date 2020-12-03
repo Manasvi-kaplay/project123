@@ -17,6 +17,19 @@ app.set("view engine","ejs");
 app.use(session({secret:"TSS",saveUninitialized:true}))
 const {spawn} = require('child_process');
 const { json } = require("body-parser");
+function timeConverter(UNIX_timestamp){
+  var a = new Date(UNIX_timestamp * 1000);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = "0"+a.getMinutes();
+  var sec = "0"+a.getSeconds();
+  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min.substr(-2) + ':' + sec.substr(-2) ;
+  return time;
+}//1606840660
+console.log(timeConverter(1606842126));
  app.post('/data', (req, res) => {
   var dataToSend;
   var link=req.body.link;
