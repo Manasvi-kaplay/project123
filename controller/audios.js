@@ -45,7 +45,7 @@ router.get('/search',function(req,res){
           audioUrls.push(url)
         }
         if(audioUrls.length==files.length-1){
-          //console.log("all audios..",audioUrls);
+          console.log("all audios..",audioUrls);
     //res.status(200).json({status:1,result:audioUrls,total:audioUrls.length});
     res.json({result:audioUrls,total:audioUrls.length})
         }

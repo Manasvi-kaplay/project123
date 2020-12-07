@@ -2,7 +2,7 @@ var express=require("express");
 var app=express();
 var bodyParser=require("body-parser");
 var fileupload=require("express-fileupload");
-var session=require("express-session")
+var session=require("express-session");
 var request=require("request-promise");
 app.use(bodyParser.urlencoded({
     extended:false,
@@ -39,8 +39,8 @@ console.log(timeConverter(1606842126));
    dataToSend=data.toString();
   });
   python2.on('close', (code) => {
-    //console.log("dataToSend..",dataToSend);
-    if(dataToSend==undefined){
+    console.log("dataToSend..",dataToSend);
+    if(dataToSend==undefined || dataToSend=="\r\n"){
       res.status(400).json({status:0,msg:"Cannot retrieve data from the website due to security issues.Please copy/paste or write the text"});
     }
     else{
@@ -98,27 +98,36 @@ console.log(timeConverter(1606842126));
       var ob;
       var multimedia=[];
       var arr=[];
+      var url;
       for(var k=0;k<data.length;k+=1){
-        if(data[k].hits.length>0 && arr.indexOf(data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url)==-1){
-          ob={[k]:data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url}
-          //console.log("data ob..",ob);
+        if(data[k].hits.length>0){
+          url=data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url;
+          if(arr.indexOf(url)==-1){
+            ob={[k]:url}
+          console.log("data ob..",ob);
           multimedia.push(ob);
-          arr.push(data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url)
+          arr.push(url)
+          }
         }
         else if(data2[k].hits.length>0){
-          ob={[k]:data2[k].hits[Math.floor((Math.random()*data2[k].hits.length))].videos.medium.url}
-          //console.log("data2 ob..",ob);
+          url=data2[k].hits[Math.floor((Math.random()*data2[k].hits.length))].videos.medium.url;
+          if(arr.indexOf(url)==-1){
+            ob={[k]:url}
+          console.log("data2 ob..",ob);
           multimedia.push(ob);
-          arr.push(data2[k].hits[Math.floor((Math.random()*data2[k].hits.length))].videos.medium.url)
+          arr.push(url)
+          }
+          
         }
-        else if(imgdata[k].hits.length>0){
+        else if(imgdata[k].hits.length>0 && arr.indexOf(imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL)==-1){
           ob={[k]:imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL}
+          console.log("img ob...",ob)
           multimedia.push(ob)
           arr.push(imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL)
         }
-        else if(imgdata[imglength-1].hits.length>0){
+        else if(imgdata[imglength-1].hits.length>0 && arr.indexOf(imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL)==-1){
           ob={[k]:imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL}
-          //console.log("ob..",ob);
+          console.log("ob..",ob);
           multimedia.push(ob);
           arr.push(imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL)
         }
@@ -128,7 +137,7 @@ console.log(timeConverter(1606842126));
           arr.push("No image/video available")
         }
       }
-  //    console.log(" array..",arr);
+      //console.log(" multimedia array..",multimedia);
       obj.multimedia=multimedia;
       res.status(200).json({status:1,result:obj});
   }

@@ -12,6 +12,19 @@ import json
 
 def key_words_of_each_sent(article_text):
     sentence_list = nltk.sent_tokenize(article_text)
+    # formatted_sentence_list=[]
+    # count=0
+    # for j in range(len(sentence_list)):
+    #     if j==0:
+    #         formatted_sentence_list.append(sentence_list[j])
+    #     else:
+    #         if len(sentence_list[j].split())<=12:
+    #             formatted_sentence_list.append(sentence_list[j]+sentence_list[j+1])
+    #             count=j+1
+    #         elif j!=count:
+    #             formatted_sentence_list.append(sentence_list[j])
+    # print("formatted_sentence_list..",formatted_sentence_list)
+    # print("formatted_sentence_list length...",len(formatted_sentence_list))
     # Removing special characters and digits
     formatted_article_text = re.sub('[^a-zA-Z]', ' ', article_text )
     formatted_article_text = re.sub(r'\s+', ' ', formatted_article_text)
