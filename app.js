@@ -17,19 +17,6 @@ app.set("view engine","ejs");
 app.use(session({secret:"TSS",saveUninitialized:true}))
 const {spawn} = require('child_process');
 const { json } = require("body-parser");
-function timeConverter(UNIX_timestamp){
-  var a = new Date(UNIX_timestamp * 1000);
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var year = a.getFullYear();
-  var month = months[a.getMonth()];
-  var date = a.getDate();
-  var hour = a.getHours();
-  var min = "0"+a.getMinutes();
-  var sec = "0"+a.getSeconds();
-  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min.substr(-2) + ':' + sec.substr(-2) ;
-  return time;
-}//1606840660
-console.log(timeConverter(1606842126));
  app.post('/data', (req, res) => {
   var dataToSend;
   var link=req.body.link;
@@ -39,7 +26,7 @@ console.log(timeConverter(1606842126));
    dataToSend=data.toString();
   });
   python2.on('close', (code) => {
-    console.log("dataToSend..",dataToSend);
+    //console.log("dataToSend..",dataToSend);
     if(dataToSend==undefined || dataToSend=="\r\n"){
       res.status(400).json({status:0,msg:"Cannot retrieve data from the website due to security issues.Please copy/paste or write the text"});
     }
@@ -101,6 +88,7 @@ console.log(timeConverter(1606842126));
       var url;
       for(var k=0;k<data.length;k+=1){
         if(data[k].hits.length>0){
+          //console.log("inside if data..")
           url=data[k].hits[Math.floor((Math.random()*data[k].hits.length))].videos.medium.url;
           if(arr.indexOf(url)==-1){
             ob={[k]:url}
@@ -108,8 +96,22 @@ console.log(timeConverter(1606842126));
           multimedia.push(ob);
           arr.push(url)
           }
+          else if(arr.indexOf(url)!=-1 && imgdata[k].hits.length>0 ){
+            //console.log("duplicate!!")
+            ob={[k]:imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL}
+          console.log("img ob...",ob)
+          multimedia.push(ob)
+          arr.push(imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL)
+          }
+          else if(arr.indexOf(url)!=-1 && imgdata[imglength-1].hits.length>0){
+            ob={[k]:imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL}
+          console.log("img2 ob...",ob)
+          multimedia.push(ob)
+          arr.push(imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL)
+          }
         }
         else if(data2[k].hits.length>0){
+          //console.log("inside else if data2..")
           url=data2[k].hits[Math.floor((Math.random()*data2[k].hits.length))].videos.medium.url;
           if(arr.indexOf(url)==-1){
             ob={[k]:url}
@@ -117,15 +119,21 @@ console.log(timeConverter(1606842126));
           multimedia.push(ob);
           arr.push(url)
           }
-          
-        }
-        else if(imgdata[k].hits.length>0 && arr.indexOf(imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL)==-1){
-          ob={[k]:imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL}
+          else if(arr.indexOf(url)!=-1 && imgdata[k].hits.length>0 ){
+            //console.log("duplicate!!")
+            ob={[k]:imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL}
           console.log("img ob...",ob)
           multimedia.push(ob)
           arr.push(imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL)
+          }
+          else if(arr.indexOf(url)!=-1 && imgdata[imglength-1].hits.length>0){
+            ob={[k]:imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL}
+          console.log("img2 ob...",ob)
+          multimedia.push(ob)
+          arr.push(imgdata[k].hits[Math.floor((Math.random()*imgdata[k].hits.length))].previewURL)
+          }
         }
-        else if(imgdata[imglength-1].hits.length>0 && arr.indexOf(imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL)==-1){
+        else if(imgdata[imglength-1].hits.length>0){
           ob={[k]:imgdata[imglength-1].hits[Math.floor((Math.random()*imgdata[imglength-1].hits.length))].previewURL}
           console.log("ob..",ob);
           multimedia.push(ob);
@@ -137,7 +145,6 @@ console.log(timeConverter(1606842126));
           arr.push("No image/video available")
         }
       }
-      //console.log(" multimedia array..",multimedia);
       obj.multimedia=multimedia;
       res.status(200).json({status:1,result:obj});
   }
