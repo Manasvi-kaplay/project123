@@ -14,6 +14,11 @@ router.get('/get',function(req,res){
 })
 router.post('/create',function(req,res){
   console.log("req.body..",req.body);
+  // Elements to be sent by the front end:
+  var email=req.body.email;
+  var plan=req.body.plan;
+  var stripeToken=req.body.stripeToken;
+  var priceId="plan_IYFGga7k78qpwc";
   let date_ob = new Date();
 let date = ("0" + date_ob.getDate()).slice(-2);
 let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
@@ -23,34 +28,39 @@ let minutes = date_ob.getMinutes();
 let seconds = date_ob.getSeconds();
 var date_time=year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds
 console.log(date_time);
-  var email="manasvi111.kaplay@gmail.com";
-  var plan="Premium";
-  stripe.charges.create({
-     amount: 10000,
-     currency: "inr",
-     source: req.body.stripeToken, // obtained with Stripe.js
-     receipt_email:email,
-     description: "For testing purpose"
-   }, function(err, charge) {
-     // asynchronously called
-     if(err){
-       console.log("err..*",err);
-       res.status(400).json({status:0,error:err});
-     }
-     if(charge){
-       console.log("charge..",charge);
-       var charge_id=charge.id;
-       allQueries.update("users",{email:email},{plan:plan},{payment_date:date_time,charge_ids:charge_id},function(error,result){
-         if(error){
-          res.status(400).json({status:0,error:error});
-         }
-         if(result){
-      var pagedata={"title":"Success!",pagename:"payment_success",receipt_url:charge.receipt_url};
-      res.render("layout",pagedata);
-         }
-       })
-     }
-   });
+allQueries.find("plans",{planName:plan},function(err0,result){
+  if(err0){
+    res.status(400).json({status:0,error:err0})
+  }
+  if(result){
+    console.log("selected plan is..",result[0])
+  stripe.customers.create({email:email,description:plan,source:stripeToken},function(err,customer){
+    if(err){
+      res.status(400).json({status:0,error:err})
+    }
+    if(customer){
+          stripe.subscriptions.create({customer: customer.id,items: [{plan:result[0].planId}]},function(err2,subscription){
+            if(err2){
+              res.status(400).json({status:0,error:err2});
+            }
+            if(subscription){
+              console.log("subscription...",subscription);
+              allQueries.update("users",{email:email},{plan:plan},{payment_date:date_time,customer_id:customer.id},function(err3,output){
+                if(err3){
+                  res.status(400).json({status:0,error:err3});
+                }
+                if(output){
+                  //res.status(200).json({status:1,subscription:subscription,result:output});
+                  var pagedata={"title":"Successful payment","pagename":"payment_success"};
+                  res.render("layout",pagedata);
+                }
+              })
+            }
+          })
+    }
+  })
+}
+})
 })
 router.get('/:email',function(req,res){
   var email=req.params.email;

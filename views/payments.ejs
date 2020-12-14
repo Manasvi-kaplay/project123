@@ -19,6 +19,8 @@
               <div id="card-errors" role="alert"></div>
             </div>
           <br>
+          <input type="hidden" name="email" value="manasvikaplay123@gmail.com">
+         <input type="hidden" name="plan" value="gold">
             <button>Submit Payment</button>
           </form>
           </center>
@@ -53,6 +55,7 @@ form.addEventListener('submit', function(event) {
       errorElement.textContent = result.error.message;
     } else {
       // Send the token to your server.
+      console.log("call stripeTokenHandler..")
       stripeTokenHandler(result.token);
     }
   });
@@ -60,11 +63,21 @@ form.addEventListener('submit', function(event) {
   // Insert the token ID into the form so it gets submitted to the server
   var form = document.getElementById('payment-form');
   var hiddenInput = document.createElement('input');
+  // var hiddenInputEmail = document.createElement('input');
+  // var hiddenInputPlan = document.createElement('input');
   hiddenInput.setAttribute('type', 'hidden');
   hiddenInput.setAttribute('name', 'stripeToken');
   hiddenInput.setAttribute('value', token.id);
+  console.log("token.id",token)
+  // hiddenInputEmail.setAttribute('type', 'hidden');
+  // hiddenInputEmail.setAttribute('name', 'email');
+  // hiddenInputEmail.setAttribute('value', 'manasvi111.kaplay@gmil.com');
+  // hiddenInputPlan.setAttribute('type', 'hidden');
+  // hiddenInputPlan.setAttribute('name', 'plan');
+  // hiddenInputPlan.setAttribute('value', 'premium');
   form.appendChild(hiddenInput);
-
+  // form.appendChild(hiddenInputEmail);
+  // form.appendChild(hiddenInputPlan);
   // Submit the form
   form.submit();
 }

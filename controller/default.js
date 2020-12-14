@@ -7,5 +7,5 @@ router.use("/payment_gateway",require("./payment_gateway"))
 router.use("/users",require("./users"))
 router.use("/user_uploads",require("./user_uploads"))
 router.use("/videoEditting",require("./videoEditting"))
-//router.use("/plan",require("./plan"))
+router.use("/plans",require("./plans"))
 module.exports=router;
