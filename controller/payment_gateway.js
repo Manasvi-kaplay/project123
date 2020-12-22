@@ -6,19 +6,14 @@ router.get('/pay',function(req,res){
   var pagedata={"title":"Payments","pagename":"payments"}
   res.render("layout",pagedata);
 })
-router.get('/get',function(req,res){
-    var ret=stripe.charges.retrieve('ch_1HtbrEJag2Djgj0uUO0OSFO8', {
-        api_key: 'sk_test_51HqeWpJag2Djgj0ucTIInopI9lQKekdORucuXNfmhHcJZpDSYrU5Ohpejj5PsllaerHP6gfRdVaQroxH6yzg91lq001Zgp2EWr'
-      })
-      console.log("ret..",ret);
-})
 router.post('/create',function(req,res){
   console.log("req.body..",req.body);
   // Elements to be sent by the front end:
   var email=req.body.email;
   var plan=req.body.plan;
   var stripeToken=req.body.stripeToken;
-  var priceId="plan_IYFGga7k78qpwc";
+  var interval=req.body.interval;
+ // var priceId="plan_IYFGga7k78qpwc";
   let date_ob = new Date();
 let date = ("0" + date_ob.getDate()).slice(-2);
 let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
@@ -34,12 +29,35 @@ allQueries.find("plans",{planName:plan},function(err0,result){
   }
   if(result){
     console.log("selected plan is..",result[0])
-  stripe.customers.create({email:email,description:plan,source:stripeToken},function(err,customer){
+  stripe.customers.create({email:email,description:plan+" per "+interval,source:stripeToken},function(err,customer){
     if(err){
       res.status(400).json({status:0,error:err})
     }
     if(customer){
-          stripe.subscriptions.create({customer: customer.id,items: [{plan:result[0].planId}]},function(err2,subscription){
+      if(interval=="month" || interval=="Month"){
+        stripe.subscriptions.create({customer: customer.id,items: [{plan:result[0].planId}]},function(err2,subscription){
+          if(err2){
+            res.status(400).json({status:0,error:err2});
+          }
+          if(subscription){
+            console.log("subscription...",subscription);
+            allQueries.update("users",{email:email},{plan:plan},{payment_date:date_time,customer_id:customer.id},function(err3,output){
+              if(err3){
+                res.status(400).json({status:0,error:err3});
+              }
+              if(output){
+                stripe.invoices.retrieve(subscription.latest_invoice,function(err4,receipt){
+                  res.status(200).json({status:1,subscription:subscription,receipt:receipt.hosted_invoice_url});
+                //var pagedata={"title":"Successful payment","pagename":"payment_success",receipt:receipt.hosted_invoice_url};
+                //res.render("layout",pagedata);
+                })
+              }
+            })
+          }
+        })
+      }
+        else if(interval=="year"||interval=="Year"){
+          stripe.subscriptions.create({customer: customer.id,items: [{plan:result[0].planIdYear}]},function(err2,subscription){
             if(err2){
               res.status(400).json({status:0,error:err2});
             }
@@ -50,13 +68,16 @@ allQueries.find("plans",{planName:plan},function(err0,result){
                   res.status(400).json({status:0,error:err3});
                 }
                 if(output){
-                  //res.status(200).json({status:1,subscription:subscription,result:output});
-                  var pagedata={"title":"Successful payment","pagename":"payment_success"};
-                  res.render("layout",pagedata);
+                  stripe.invoices.retrieve(subscription.latest_invoice,function(err4,receipt){
+                    res.status(200).json({status:1,subscription:subscription,receipt:receipt.hosted_invoice_url});
+                  //var pagedata={"title":"Successful payment","pagename":"payment_success",receipt:receipt.hosted_invoice_url};
+                  //res.render("layout",pagedata);
+                  })
                 }
               })
             }
           })
+        }  
     }
   })
 }
@@ -69,27 +90,21 @@ if(err){
   res.status(400).json({status:0,error:err});
 }
 if(result){
-res.status(200).json({status:1,result:result[0]})
 var details=[];
-var detailsObj;
+var detailsObj={};
+var inv;
 async function retrieve(){
-  for(var i=0;i<result[0].charge_ids.length;i+=1){
-    await stripe.charges.retrieve(result[0].charge_ids[i], {
-      api_key: 'sk_test_51HqeWpJag2Djgj0ucTIInopI9lQKekdORucuXNfmhHcJZpDSYrU5Ohpejj5PsllaerHP6gfRdVaQroxH6yzg91lq001Zgp2EWr'
-    },function(err2,stripeResult){
-if(stripeResult){
-//res.status(200).json({status:1,result:result})
-console.log("stripe charge obj..",stripeResult);
-detailsObj={"charge_id":stripeResult.id,"amount":stripeResult.amount,"receipt_url":stripeResult.receipt_url,"payment_method":stripeResult.payment_method}
-details.push(detailsObj);
-console.log("details array..",details);
-}
-    });
+  for(var i=0;i<result[0].customer_id.length;i+=1){
+   inv= await stripe.invoices.retrieveUpcoming({customer:result[0].customer_id[i]})
+    detailsObj={"amount":inv.lines.data[0].amount/100,"plan":inv.lines.data[0].description,"payment_date":result[0].payment_date[i]}
+    //console.log("detailsObj..",detailsObj);
+    details.push(detailsObj);
   }
+  res.status(200).json({status:1,payment_history:details});
 }
 retrieve();
 }
-
   })
 })
+
 module.exports=router;

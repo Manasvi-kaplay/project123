@@ -31,36 +31,26 @@ stripe.plans.create({amount: amount,currency: 'inr',interval: interval,product: 
       });
 })
 router.get('/all',function(req,res){
-    stripe.plans.list(function(err,result){
+    allQueries.find("plans",{},function(err,result){
         if(err){
-            res.status(400).json({status:0,error:err});
+            res.status(400).json({status:0,error:err})
         }
         if(result){
-            var plans=[];
-            var ob;
-            var fetchData = function (obj) {
-                 return new Promise(function (resolve, reject) {
-                    allQueries.find("plans",{planId:obj.id},function(err2,result2){
-                        if(err2){
-                            console.log("err2..",err2);
-                        }
-                        if(result2){
-                            resolve(result2);
-                            //console.log("result2...",result2);
-                        }
-                    })
-                  });
-                };
-            async function join(){
-                var call;
-            for(var i=0;i<result.data.length;i+=1){
-                call=await fetchData(result.data[i]);
-                ob={"plan":call[0].planName,"amount":result.data[i].amount,"currency":result.data[i].currency,"interval":result.data[i].interval}
-                plans.push(ob)
+            async function fetch(){
+                var plan_month;
+                var plan_year;
+                var obj={};
+                var plans=[];
+                for(var i=0;i<result.length;i+=1){
+                    plan_month=await stripe.plans.retrieve(result[i].planId);
+                    plan_year=await stripe.prices.retrieve(result[i].planIdYear);
+                    obj={"planName":result[i].planName,"month":{"price":plan_month.amount/100},"year":{"price":plan_year.unit_amount/100}}
+                    console.log("obj..",obj);
+                    plans.push(obj)
+                }
+                res.status(200).json({status:1,plans:plans})
             }
-            res.status(200).json({status:1,result:plans});
-        }
-        join()
+            fetch();
         }
     })
 })
