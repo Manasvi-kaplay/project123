@@ -158,6 +158,7 @@ const { json } = require("body-parser");
           arr.push("No image/video available")
         }
       }
+      console.log("array..",arr);
       obj.multimedia=multimedia;
       res.status(200).json({status:1,result:obj});
   }
